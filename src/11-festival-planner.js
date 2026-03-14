@@ -49,5 +49,65 @@
  *   mgr.getUpcoming("2025-01-01", 1); // => [{ name: "Republic Day", ... }]
  */
 export function createFestivalManager() {
-  // Your code here
+	const festivals = []; // private state
+	const validTypes = new Set(["religious", "national", "cultural"]);
+
+	const isValidDate = (d) =>
+		typeof d === "string" && !Number.isNaN(new Date(d).getTime());
+
+	const copy = (f) => ({ ...f });
+
+	return {
+		addFestival(name, date, type) {
+			if (
+				!name ||
+				typeof name !== "string" ||
+				!isValidDate(date) ||
+				!validTypes.has(type)
+			) {
+				return -1;
+			}
+
+			if (festivals.some((f) => f.name === name)) {
+				return -1;
+			}
+
+			festivals.push({ name, date, type });
+			return festivals.length;
+		},
+
+		removeFestival(name) {
+			const idx = festivals.findIndex((f) => f.name === name);
+			if (idx === -1) return false;
+
+			festivals.splice(idx, 1);
+			return true;
+		},
+
+		getAll() {
+			return festivals.map(copy);
+		},
+
+		getByType(type) {
+			if (!validTypes.has(type)) return [];
+			return festivals.filter((f) => f.type === type).map(copy);
+		},
+
+		getUpcoming(currentDate, n = 3) {
+			if (!isValidDate(currentDate)) return [];
+
+			const base = new Date(currentDate).getTime();
+
+			return festivals
+				.filter((f) => new Date(f.date).getTime() >= base)
+				.slice()
+				.sort((a, b) => new Date(a.date) - new Date(b.date))
+				.slice(0, n)
+				.map(copy);
+		},
+
+		getCount() {
+			return festivals.length;
+		},
+	};
 }
